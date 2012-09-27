@@ -76,9 +76,11 @@ app.View.ProfileUpdateView = Backbone.View.extend({
     return $(this.el);
   }
 });
+
 /*
   Status
 */
+
 app.View.StatusNewView = Backbone.View.extend({
   template: _.template($('#timeline-new').html()),
   progressTemplate: _.template($('#timeline-progress').html()),
