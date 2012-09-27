@@ -60,5 +60,7 @@ public class ColumnFamilyKeys {
     public final static String GROUP_COUNTER_CF = "GroupCounter";
 
     public final static String GROUPLINE_CF = "Groupline";
+    
+    public final static String ATTACHMENT_CF = "Attachment";
 
 }
