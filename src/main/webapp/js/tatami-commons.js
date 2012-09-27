@@ -341,6 +341,8 @@ app.View.TimeLineItemView = Backbone.View.extend({
 
 app.View.TimeLineItemInnerView = Backbone.View.extend({
   tagName: 'table',
+   inSearchMode: false,
+   searchChar: '',
 
   template: _.template($('#timeline-item-inner').html()),
 
@@ -354,8 +356,49 @@ app.View.TimeLineItemInnerView = Backbone.View.extend({
     'click .status-action-share': 'shareAction',
     'click .status-action-favorite': 'favoriteAction',
     'click .status-action-remove': 'removeAction',
-    'submit .reply-form': 'sendReply'
+    'submit .reply-form': 'sendReply',
+    'keyup .reply-form': 'logKey'
   },
+
+  logKey: function(e) {
+      var keycode = e.keyCode;
+      var searchString;
+      var targ;
+      	if (!e) var e = window.event;
+      	if (e.target) targ = e.target;
+      	else if (e.srcElement) targ = e.srcElement;
+      	if (targ.nodeType == 3) // defeat Safari bug
+      		targ = targ.parentNode;
+      var status = $(targ).val();
+      var pressedChar = $(targ).val().substring(status.length-1,status.length);
+      var authorizedPrevChar = "[\\s,\!:\.;\\n]";
+      var authorizedEndChar = "[\\s,\!:;\\n\.]";
+      var unsupportedCode = ['8','9','18','17','16', '37', '38','39', '40'];
+      if (unsupportedCode.indexOf(keycode.toString()) != -1 )   {
+          return;
+      }
+      if ((keycode == 0 || keycode == 51) && !this.inSearchMode) {
+          var previousChar = status.substring(status.length-2,status.length-1);
+          if (keycode == 0){
+              this.searchChar = "@";
+          }   else {
+              this.searchChar = "#";
+          }
+          if( previousChar.match( authorizedPrevChar) || previousChar == ''){
+              this.inSearchMode = true;
+          }
+      } else if (this.inSearchMode && pressedChar != this.searchChar) {
+          searchString = status.substring(status.lastIndexOf(this.searchChar)+1,status.length);
+          if (pressedChar.match(authorizedEndChar)){
+              this.inSearchMode = false;
+          } else {
+              var urlSearch;
+              queryParam = this.searchChar+searchString;
+              //appel method david
+              searchSuggestions(queryParam, targ);
+          }
+      }
+     },
 
   detailsAction: function () {
     this.trigger('details');

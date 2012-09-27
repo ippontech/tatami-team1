@@ -69,14 +69,56 @@ app.View.ProfileStatsView = Backbone.View.extend({
 app.View.UpdateView = Backbone.View.extend({
   tagName: 'form',
   template: _.template($('#update-template').html()),
+  inSearchMode: false,
+  searchChar: '',
 
   initialize: function() {
     $(this.el).addClass('row-fluid');
   },
 
   events: {
-    'submit': 'addStatus'
+    'submit': 'addStatus',
+     'keyup :input': 'logKey'
   },
+
+   logKey: function(e) {
+      var keycode = e.keyCode;
+      var searchString;
+      var targ;
+      	if (!e) var e = window.event;
+      	if (e.target) targ = e.target;
+      	else if (e.srcElement) targ = e.srcElement;
+      	if (targ.nodeType == 3) // defeat Safari bug
+      		targ = targ.parentNode;
+    var status = $(targ).val();
+    var pressedChar = $(targ).val().substring(status.length-1,status.length);
+    var authorizedPrevChar = "[\\s,\!:\.;\\n]";
+    var authorizedEndChar = "[\\s,\!:;\\n\.]";
+    var unsupportedCode = ['8','9','18','17','16', '37', '38','39', '40'];
+    if (unsupportedCode.indexOf(keycode.toString()) != -1 )   {
+        return;
+    }
+    if ((keycode == 0 || keycode == 51) && !this.inSearchMode) {
+        var previousChar = status.substring(status.length-2,status.length-1);
+        if (keycode == 0){
+            this.searchChar = "@";
+        }   else {
+            this.searchChar = "#";
+        }
+        if( previousChar.match( authorizedPrevChar) || previousChar == ''){
+            this.inSearchMode = true;
+        }
+    } else if (this.inSearchMode && pressedChar != this.searchChar) {
+        searchString = status.substring(status.lastIndexOf(this.searchChar)+1,status.length);
+        if (pressedChar.match(authorizedEndChar)){
+            this.inSearchMode = false;
+        } else {
+            var urlSearch;
+            queryParam = this.searchChar+searchString;
+            searchSuggestions(queryParam, targ);
+        }
+    }
+   },
 
   addStatus: function(e) {
     var self = this;
@@ -672,6 +714,7 @@ app.View.TagsSearchView = Backbone.View.extend({
 });
 
 app.View.TagsView = Backbone.View.extend({
+
     initialize:function () {
         this.views = {};
 
@@ -707,13 +750,57 @@ Search
 */
 
 app.View.SearchSearchView = Backbone.View.extend({
+
+  inSearchMode: false,
+  searchChar: '',
   template: _.template($('#search-search-form').html()),
 
   tagName: 'form',
 
   events: {
-    'submit': 'submit'
+    'submit': 'submit',
+    'keyup :input': 'logKey'
   },
+
+  logKey: function(e) {
+        var keycode = e.keyCode;
+        var searchString;
+        var targ;
+        	if (!e) var e = window.event;
+        	if (e.target) targ = e.target;
+        	else if (e.srcElement) targ = e.srcElement;
+        	if (targ.nodeType == 3) // defeat Safari bug
+        		targ = targ.parentNode;
+        var status = $(targ).val();
+        var pressedChar = $(targ).val().substring(status.length-1,status.length);
+        var authorizedPrevChar = "[\\s,\!:\.;\\n]";
+        var authorizedEndChar = "[\\s,\!:;\\n\.]";
+        var unsupportedCode = ['8','9','18','17','16', '37', '38','39', '40'];
+        if (unsupportedCode.indexOf(keycode.toString()) != -1 )   {
+            return;
+        }
+        if ((keycode == 0 || keycode == 51) && !this.inSearchMode) {
+            var previousChar = status.substring(status.length-2,status.length-1);
+            if (keycode == 0){
+                this.searchChar = "@";
+            }   else {
+                this.searchChar = "#";
+            }
+            if( previousChar.match( authorizedPrevChar) || previousChar == ''){
+                this.inSearchMode = true;
+            }
+        } else if (this.inSearchMode && pressedChar != this.searchChar) {
+            searchString = status.substring(status.lastIndexOf(this.searchChar)+1,status.length);
+            if (pressedChar.match(authorizedEndChar)){
+                this.inSearchMode = false;
+            } else {
+                var urlSearch;
+                queryParam = this.searchChar+searchString;
+                searchSuggestions(queryParam, targ);
+            }
+        }
+  },
+
 
   initialize: function(){
 
@@ -882,18 +969,6 @@ app.Router.HomeRouter = Backbone.Router.extend({
             allowed:500,
             warning:50,
             counterText:text_characters_left + " "
-        });
-        
-        $("li.suggest").bind("click", function(){
-        	updateStatusWithSuggestion($("#updateStatusContent"), $(this).text());
-        });
-        $("#updateStatusContent").bind('keypress', function (e) {
-            var keycode = (e.keycode ? e.keycode : e.which);
-            if (keycode == 64) { //the user pressed the "@" key
-               // TODO drop down list of users
-            } else if (keycode == 35) { //the user pressed the "#" key
-               // TODO drop down list of tags
-            }
         });
 
         $("#updateStatusBtn").popover({
