@@ -1,5 +1,6 @@
 package fr.ippon.tatami.service;
 
+import fr.ippon.tatami.domain.Attachment;
 import fr.ippon.tatami.domain.Group;
 import fr.ippon.tatami.domain.Status;
 import fr.ippon.tatami.domain.User;
@@ -79,28 +80,40 @@ public class StatusUpdateService {
     @Inject
     private SearchService searchService;
 
+    @Inject
+    private AttachmentRepository attachmentRepository;
+    
     public void postStatus(String content) {
-        createStatus(content, null, "", "");
+        createStatus(content, null, "", "", null);
     }
 
     public void postStatusToGroup(String content, Group group) {
-        createStatus(content, group, "", "");
+        createStatus(content, group, "", "", null);
     }
 
+    public void postStatusWithAttachment(String content, Attachment attach) {
+        createStatus(content, null, "", "", attach);
+    }
+
+    public void postStatusToGroupWithAttachment(String content, Group group, Attachment attach) {
+        createStatus(content, group, "", "", attach);
+    }
+
+    
     public void replyToStatus(String content, String replyTo) {
         Status originalStatus = statusRepository.findStatusById(replyTo);
         if (!originalStatus.getReplyTo().equals("")) {
             log.debug("Original status is also a reply, replying to the real original status instead.");
             Status realOriginalStatus = statusRepository.findStatusById(originalStatus.getReplyTo());
-            Status replyStatus = createStatus(content, null, realOriginalStatus.getStatusId(), originalStatus.getUsername());
+            Status replyStatus = createStatus(content, null, realOriginalStatus.getStatusId(), originalStatus.getUsername(), null);
             discussionRepository.addReplyToDiscussion(realOriginalStatus.getStatusId(), replyStatus.getStatusId());
         } else {
-            Status replyStatus = createStatus(content, null, replyTo, originalStatus.getUsername());
+            Status replyStatus = createStatus(content, null, replyTo, originalStatus.getUsername(), null);
             discussionRepository.addReplyToDiscussion(originalStatus.getStatusId(), replyStatus.getStatusId());
         }
     }
 
-    private Status createStatus(String content, Group group, String replyTo, String replyToUsername) {
+    private Status createStatus(String content, Group group, String replyTo, String replyToUsername, Attachment attach) {
         long startTime = 0;
         if (log.isDebugEnabled()) {
             startTime = Calendar.getInstance().getTimeInMillis();
@@ -122,6 +135,8 @@ public class StatusUpdateService {
         String day = StatsService.DAYLINE_KEY_FORMAT.format(status.getStatusDate());
         daylineRepository.addStatusToDayline(status, day);
         userlineRepository.addStatusToUserline(status);
+        
+        
 
         // add the status to the group line and group followers
         if (group != null) {
@@ -172,19 +187,25 @@ public class StatusUpdateService {
                 }
             }
         }
-
+        
         // Increment status count for the current user
         counterRepository.incrementStatusCounter(currentLogin);
 
         // Add to the searchStatus engine
         searchService.addStatus(status);
 
+        // TODO ajouter l'attachment dans createStatus
+        // Add the attachment from the status
+        attachmentRepository.createAttachment(attach);        
+        
         if (log.isDebugEnabled()) {
             long finishTime = Calendar.getInstance().getTimeInMillis();
             log.debug("Status created in " + (finishTime - startTime) + "ms.");
         }
         return status;
     }
+      
+    
 
     /**
      * Parses the status to find tags, and add those tags to the TagLine and the Trends.
