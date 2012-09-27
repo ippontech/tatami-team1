@@ -688,7 +688,8 @@ function feedSuggestions(target, results) {
  * Search against one of the two services depending on the query first char (@ or # allowed)
  * The target is the textarea under which a suggestion container should display the results list
  */
-function searchSuggestions(query, target) {
+function searchSuggestions(query, targetDOM) {
+	var target = $(targetDOM);
 	if (target == null
 			|| query == null || query.length == 0
 			|| (query.charAt(0) != '@' && query.charAt(0) != '#')) {
