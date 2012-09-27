@@ -619,6 +619,17 @@
             <version>${commons.io.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-runtime</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-socketio</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -644,6 +655,8 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+
+
     </dependencies>
     <build>
         <finalName>root</finalName>
