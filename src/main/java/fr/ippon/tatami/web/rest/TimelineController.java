@@ -1,5 +1,6 @@
 package fr.ippon.tatami.web.rest;
 
+import fr.ippon.tatami.domain.Attachment;
 import fr.ippon.tatami.domain.Status;
 import fr.ippon.tatami.domain.StatusDetails;
 import fr.ippon.tatami.service.StatusUpdateService;
@@ -58,6 +59,21 @@ public class TimelineController {
     }
 
     /**
+     * POST /statuses/update -> create a new Status
+     */
+    @RequestMapping(value = "/rest/statuses/attachment/update",
+            method = RequestMethod.POST)
+    public void postStatus(@RequestBody Attachment attach) {
+        if (log.isDebugEnabled()) {
+            log.debug("REST request to add status : " + attach.getContent());
+        }
+        //String escapedContent = StringEscapeUtils.escapeHtml(status.getContent());
+        statusUpdateService.saveAttachment(attach);
+        
+    }
+    
+    
+    /**
      * POST /statuses/discussion/:id -> reply to this Status
      */
     @RequestMapping(value = "/rest/statuses/discussion",
@@ -80,6 +96,7 @@ public class TimelineController {
         if (log.isDebugEnabled()) {
             log.debug("REST request to remove status : " + statusId);
         }
+        timelineService.removeAttachment(statusId);
         timelineService.removeStatus(statusId);
     }
 
@@ -96,6 +113,21 @@ public class TimelineController {
         }
         return timelineService.getStatus(statusId);
     }
+    
+    /**
+     * GET  /statuses/show/:id -> returns a single attachment only if it exists, specified by the status id parameter
+     */
+    @RequestMapping(value = "/rest/statuses/attachment/show/{statusId}",
+            method = RequestMethod.GET,
+            produces = "application/json")
+    @ResponseBody
+    public Attachment getAttachment(@PathVariable("statusId") String statusId) {
+        if (log.isDebugEnabled()) {
+            log.debug("REST request to get status Id : " + statusId);
+        }
+        return timelineService.getAttachment(statusId);
+    }
+    
 
     /**
      * GET  /statuses/details/:id -> returns the details for a status, specified by the id parameter
@@ -122,8 +154,8 @@ public class TimelineController {
             log.debug("REST request to share status : " + statusId);
         }
         timelineService.shareStatus(statusId);
-    }
-
+    }    
+    
     /**
      * GET  /statuses/home_timeline -> get the latest statuses from the current user
      */

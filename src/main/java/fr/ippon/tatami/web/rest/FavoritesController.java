@@ -1,5 +1,6 @@
 package fr.ippon.tatami.web.rest;
 
+import fr.ippon.tatami.domain.Attachment;
 import fr.ippon.tatami.domain.Status;
 import fr.ippon.tatami.service.TimelineService;
 import org.apache.commons.logging.Log;
@@ -40,6 +41,20 @@ public class FavoritesController {
         return timelineService.getFavoritesline();
     }
 
+    /**
+     * GET  /favorites -> get the favorite status of the current user
+     */
+    @RequestMapping(value = "/rest/attachment/favorites",
+            method = RequestMethod.GET,
+            produces = "application/json")
+    @ResponseBody
+    public Collection<Attachment> listAttachmentFromFavoriteStatus() {
+        if (log.isDebugEnabled()) {
+            log.debug("REST request to get the attachment from favorite status of the current user.");
+        }
+        return timelineService.getAttachmentFromFavoritesline();
+    }    
+    
     /**
      * POST /favorites/create/:id -> Favorites the status
      */

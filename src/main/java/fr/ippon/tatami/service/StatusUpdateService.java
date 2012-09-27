@@ -91,14 +91,9 @@ public class StatusUpdateService {
         createStatus(content, group, "", "", null);
     }
 
-    public void postStatusWithAttachment(String content, Attachment attach) {
-        createStatus(content, null, "", "", attach);
+    public void saveAttachment(Attachment attach) {
+        createAttachment(attach);
     }
-
-    public void postStatusToGroupWithAttachment(String content, Group group, Attachment attach) {
-        createStatus(content, group, "", "", attach);
-    }
-
     
     public void replyToStatus(String content, String replyTo) {
         Status originalStatus = statusRepository.findStatusById(replyTo);
@@ -193,10 +188,6 @@ public class StatusUpdateService {
 
         // Add to the searchStatus engine
         searchService.addStatus(status);
-
-        // TODO ajouter l'attachment dans createStatus
-        // Add the attachment from the status
-        attachmentRepository.createAttachment(attach);        
         
         if (log.isDebugEnabled()) {
             long finishTime = Calendar.getInstance().getTimeInMillis();
@@ -205,6 +196,15 @@ public class StatusUpdateService {
         return status;
     }
       
+    /**
+     * 
+     * Add attachment to status
+     * 
+     */
+    private void createAttachment (Attachment attach) {
+        // Add the attachment from the status
+        attachmentRepository.createAttachment(attach);        
+    }
     
 
     /**

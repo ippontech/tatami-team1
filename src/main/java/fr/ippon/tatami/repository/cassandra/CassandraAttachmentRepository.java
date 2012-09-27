@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import fr.ippon.tatami.domain.Attachment;
+import fr.ippon.tatami.domain.Status;
 import fr.ippon.tatami.domain.validation.ContraintsAttachmentCreation;
 import fr.ippon.tatami.repository.AttachmentRepository;
 import fr.ippon.tatami.repository.CounterRepository;
@@ -85,6 +86,33 @@ public class CassandraAttachmentRepository implements AttachmentRepository {
             return null;
         }
         return attach;
+    }
+    
+    @Override
+    @Cacheable("attachment-cache")
+    public Attachment findAttachmentByStatusId(String statusId) {
+        if (statusId == null || statusId.equals("")) {
+            return null;
+        }
+        if (log.isTraceEnabled()) {
+            log.trace("Finding attachment : " + statusId);
+        }
+        Attachment attach = em.find(Attachment.class, statusId);
+        if (attach != null) {
+            return Boolean.TRUE.equals(attach.getRemoved()) ? null : attach;
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    @CacheEvict(value = "attachment-cache", key = "#attachment.statusId")
+    public void removeAttachment(Attachment attach) {
+        attach.setRemoved(true);
+        if (log.isDebugEnabled()) {
+            log.debug("Updating Status : " + attach);
+        }
+        em.persist(attach);
     }
 	
 }

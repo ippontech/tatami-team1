@@ -1,5 +1,6 @@
 package fr.ippon.tatami.service;
 
+import fr.ippon.tatami.domain.Attachment;
 import fr.ippon.tatami.domain.SharedStatusInfo;
 import fr.ippon.tatami.domain.Status;
 import fr.ippon.tatami.domain.StatusDetails;
@@ -65,6 +66,9 @@ public class TimelineService {
 
     @Inject
     private SearchService searchService;
+    
+    @Inject
+    private AttachmentRepository attachmentRepository;
 
     public Status getStatus(String statusId) {
         Map<String, SharedStatusInfo> line = new HashMap<String, SharedStatusInfo>();
@@ -77,6 +81,17 @@ public class TimelineService {
         }
     }
 
+    /**
+     * Get Attachment from a status 
+     * 
+     * @param statusId
+     * @return Attachment
+     */
+
+    public Attachment getAttachment(String statusId) {
+    	return attachmentRepository.findAttachmentByStatusId(statusId);
+    }
+    
     /**
      * Get the details for a status
      * - Who shared this status
@@ -182,6 +197,23 @@ public class TimelineService {
         }
         return statuses;
     }
+    
+    public Collection<Attachment> buildAttachmentList(Map<String, SharedStatusInfo> line) {
+        User currentUser = authenticationService.getCurrentUser();
+        Map<String, SharedStatusInfo> favoriteLine = favoritelineRepository.getFavoriteline(currentUser.getLogin());
+        Collection<Attachment> attachments = new ArrayList<Attachment>(line.size());
+        for (String statusId : line.keySet()) {
+            SharedStatusInfo sharedStatusInfo = line.get(statusId);
+            Attachment attach = null;
+            if (sharedStatusInfo != null) {
+            	attach = attachmentRepository.findAttachmentByStatusId(sharedStatusInfo.getOriginalStatusId());
+            } else {
+            	attach = attachmentRepository.findAttachmentByStatusId(statusId);
+            }
+        }
+        return attachments;
+    }
+    
 
     /**
      * The mentionline contains a statuses where the current user is mentioned.
@@ -229,6 +261,20 @@ public class TimelineService {
     }
 
     /**
+     * The timeline contains the user's status merged with his friends status
+     *
+     * @param nbStatus the number of status to retrieve, starting from most recent ones
+     * @return a status list
+     */
+    public Collection<Attachment> getAttachmentTimeline(int nbStatus, String since_id, String max_id) {
+        String login = authenticationService.getCurrentUser().getLogin();
+        Map<String, SharedStatusInfo> line =
+                timelineRepository.getTimeline(login, nbStatus, since_id, max_id);
+
+        return buildAttachmentList(line);
+    }    
+    
+    /**
      * The userline contains the user's own status
      *
      * @param username the user to retrieve the userline of
@@ -252,8 +298,25 @@ public class TimelineService {
         if (log.isDebugEnabled()) {
             log.debug("Removing status : " + statusId);
         }
+        final Attachment attachment = attachmentRepository.findAttachmentByStatusId(statusId);
         final Status status = statusRepository.findStatusById(statusId);
 
+        final User currentUser = authenticationService.getCurrentUser();
+        if (status.getLogin().equals(currentUser.getLogin())
+                && Boolean.FALSE.equals(status.getRemoved())) {
+        	attachmentRepository.removeAttachment(attachment);
+        	statusRepository.removeStatus(status);
+            counterRepository.decrementStatusCounter(currentUser.getLogin());
+            searchService.removeStatus(status);
+        }
+    }
+    
+    public void removeAttachment(String statusId) {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing attachment : " + statusId);
+        }
+        final Status status = statusRepository.findStatusById(statusId);
+        
         final User currentUser = authenticationService.getCurrentUser();
         if (status.getLogin().equals(currentUser.getLogin())
                 && Boolean.FALSE.equals(status.getRemoved())) {
@@ -309,4 +372,16 @@ public class TimelineService {
         Map<String, SharedStatusInfo> line = favoritelineRepository.getFavoriteline(currentLogin);
         return this.buildStatusList(line);
     }
+    
+    /**
+     * The favline contains the user's favorites status
+     *
+     * @return a status list
+     */
+    public Collection<Attachment> getAttachmentFromFavoritesline() {
+        String currentLogin = authenticationService.getCurrentUser().getLogin();
+        Map<String, SharedStatusInfo> line = favoritelineRepository.getFavoriteline(currentLogin);
+        return buildAttachmentList(line);
+    }
+    
 }

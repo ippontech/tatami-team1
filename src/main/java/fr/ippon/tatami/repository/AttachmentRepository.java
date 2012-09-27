@@ -9,5 +9,9 @@ public interface AttachmentRepository {
     void deleteAttachment(Attachment attach);
 
     Attachment findAttachmentByFilename(String filename);
+    
+    Attachment findAttachmentByStatusId(String statusId);
+    
+    void removeAttachment(Attachment attach);
 	
 }
