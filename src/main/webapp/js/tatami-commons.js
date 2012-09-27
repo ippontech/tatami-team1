@@ -669,7 +669,7 @@ function feedSuggestions(target, results) {
 		$('<div class="suggest"><ul class="suggest-menu"></ul></div>').insertBefore(target);
 	}
 	var suggestionEl = target.parent().find('.suggest');
-//	<div class="suggest"><ul class="suggest-menu"></ul></div>
+
 	var ul = suggestionEl.find('ul.suggest-menu');
 	ul.find('li').remove(); // clean any previous results
     for (var i = 0; i < results.length; i++) {
@@ -678,7 +678,7 @@ function feedSuggestions(target, results) {
     	);
 	}
     ul.find("li.suggest").bind("click", function() {
-    	updateStatusWithSuggestion($("#updateStatusContent"), $(this).text());
+    	updateStatusWithSuggestion(target, $(this).text());
     	suggestionEl.hide();
     });
     suggestionEl.show();

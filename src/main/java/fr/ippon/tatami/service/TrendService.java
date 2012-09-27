@@ -1,16 +1,24 @@
 package fr.ippon.tatami.service;
 
-import fr.ippon.tatami.repository.TrendRepository;
-import fr.ippon.tatami.repository.UserTrendRepository;
-import fr.ippon.tatami.service.util.ValueComparator;
-import fr.ippon.tatami.web.rest.dto.Trend;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.inject.Inject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import java.util.*;
+import fr.ippon.tatami.repository.TrendRepository;
+import fr.ippon.tatami.repository.UserTrendRepository;
+import fr.ippon.tatami.service.util.ValueComparator;
+import fr.ippon.tatami.web.rest.dto.Trend;
 
 /**
  * Analyzes trends (tags going up or down depending on the current time).
@@ -33,10 +41,9 @@ public class TrendService {
         List<String> tags = trendRepository.getRecentTags(domain);
         return calculateTrends(tags);
     }
-    
-    @Cacheable("tags-trends-cache")
+
     public Collection<String> getUserTagTrends(String login, Date endDate, int nbRecentTags) {
-    	return userTrendRepository.getUserRecentTags(login, endDate, nbRecentTags);
+        return userTrendRepository.getUserRecentTags(login, endDate, nbRecentTags);
     }
 
     @Cacheable("user-trends-cache")
