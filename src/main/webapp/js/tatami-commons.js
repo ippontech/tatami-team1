@@ -712,7 +712,7 @@ function searchSuggestions(query, targetDOM) {
 			$.get('/tatami/rest/tags/search', {q:q}, function (data) {
 		        var results = [];
 		        for (var i = 0; i < data.length; i++) {
-		            results[i] = data[i];
+		            results[i] = '#' + data[i];
 		        }
 		        feedSuggestions(target, results);
 		    });
