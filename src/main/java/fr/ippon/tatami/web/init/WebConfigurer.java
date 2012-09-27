@@ -4,6 +4,7 @@ import fr.ippon.tatami.config.ApplicationConfiguration;
 import fr.ippon.tatami.config.DispatcherServletConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atmosphere.cpr.AtmosphereServlet;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -81,6 +82,24 @@ public class WebConfigurer implements ServletContextListener {
                 dispatcherServletConfig));
         dispatcherServlet.addMapping("/tatami/*");
         dispatcherServlet.setLoadOnStartup(2);
+
+        log.debug("Registering Atmosphere Servlet");
+        ServletRegistration.Dynamic atmosphereServlet = servletContext.addServlet("atmosphere", new AtmosphereServlet());
+        atmosphereServlet.setInitParameter("socketio-transport", "jsonp-polling");
+        //atmosphereServlet.setInitParameter("socketio-transport", "websocket,xhr-polling,jsonp-polling");
+        //atmosphereServlet.setInitParameter("socketio-timeout", "250000");
+        //atmosphereServlet.setInitParameter("socketio-heartbeat", "150000");
+        //atmosphereServlet.setInitParameter("socketio-suspendTime", "300000");
+        atmosphereServlet.setInitParameter("com.sun.jersey.config.property.packages", "fr.ippon.tatami.web.websocket");
+        atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcasterCacheClass", "org.atmosphere.cache.SessionBroadcasterCache");
+
+
+        atmosphereServlet.setInitParameter("org.atmosphere.cpr.sessionSupport", "true");
+        atmosphereServlet.setInitParameter("org.atmosphere.cpr.AtmosphereHandler", "fr.ippon.tatami.web.websocket.ChatController");
+
+        atmosphereServlet.addMapping("/websocket/*");
+        log.debug(atmosphereServlet.getInitParameters());
+        atmosphereServlet.setLoadOnStartup(0);
 
         log.debug("Registering Spring Security Filter");
         FilterRegistration.Dynamic springSecurityFilter = servletContext.addFilter("springSecurityFilterChain",
