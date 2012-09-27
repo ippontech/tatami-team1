@@ -65,10 +65,10 @@
   <fieldset class="span12">
     <div class="control-group">
       <textarea id="updateStatusContent" class="span12" required="required" placeholder="<fmt:message key="tatami.status.update"/>..." maxlength="500" name="content"></textarea>
-  	  <input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000" />  
 	  <div>  
-		    <input type="file" id="fileselect" name="fileselect[]" multiple="multiple" />  
-   			<div id="filedrag">Glisser un fichier ici</div>  
+		    <input style="display:none;" type="file" id="fileselect" name="fileselect[]" multiple="multiple"/>
+			<div id="filedrag" title="<fmt:message key="tatami.status.attachment.title"/>"><fmt:message key="tatami.status.attachment.title"/></div><button onclick="getFile();" id="fileBtn" class="btn btn-info btn-block" type="button">Ajouter un fichier <i class="icon-upload"></i></button>
+			<span id="resultAttachment"></span>
 	  </div>     
  	<span id="contentHelp" class="pull-right" title="<fmt:message key="tatami.status.help.title"/>" data-content="<fmt:message key="tatami.status.help"/>"><i class="icon-question-sign"></i> <fmt:message key="tatami.status.help.title"/></span>
     </div>
