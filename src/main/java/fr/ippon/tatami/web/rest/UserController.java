@@ -1,13 +1,12 @@
 package fr.ippon.tatami.web.rest;
 
-import fr.ippon.tatami.domain.User;
-import fr.ippon.tatami.domain.UserStatusStat;
-import fr.ippon.tatami.security.AuthenticationService;
-import fr.ippon.tatami.service.FriendshipService;
-import fr.ippon.tatami.service.SearchService;
-import fr.ippon.tatami.service.StatsService;
-import fr.ippon.tatami.service.UserService;
-import fr.ippon.tatami.service.util.DomainUtil;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
@@ -16,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import fr.ippon.tatami.domain.User;
+import fr.ippon.tatami.domain.UserStatusStat;
+import fr.ippon.tatami.security.AuthenticationService;
+import fr.ippon.tatami.service.FriendshipService;
+import fr.ippon.tatami.service.SearchService;
+import fr.ippon.tatami.service.StatsService;
+import fr.ippon.tatami.service.UserService;
+import fr.ippon.tatami.service.util.DomainUtil;
 
 /**
  * REST controller for managing users.
@@ -50,7 +52,7 @@ public class UserController {
     @Inject
     @Named("elasticsearchActivated")
     private boolean elasticsearchActivated;
-
+    
     /**
      * GET  /users/show?screen_name=jdubois -> get the "jdubois" user
      */
@@ -122,4 +124,5 @@ public class UserController {
         Collection<String> logins = searchService.searchUserByPrefix(domain, prefix);
         return userService.getUsersByLogin(logins);
     }
+    
 }

@@ -10,4 +10,5 @@ public interface TrendRepository {
     void addTag(String domain, String tag);
 
     List<String> getRecentTags(String domain);
+    
 }

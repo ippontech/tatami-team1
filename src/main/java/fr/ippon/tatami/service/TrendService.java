@@ -33,6 +33,11 @@ public class TrendService {
         List<String> tags = trendRepository.getRecentTags(domain);
         return calculateTrends(tags);
     }
+    
+    @Cacheable("tags-trends-cache")
+    public Collection<String> getUserTagTrends(String login, Date endDate, int nbRecentTags) {
+    	return userTrendRepository.getUserRecentTags(login, endDate, nbRecentTags);
+    }
 
     @Cacheable("user-trends-cache")
     public List<Trend> getTrendsForUser(String login) {
