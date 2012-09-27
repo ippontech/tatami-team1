@@ -1,7 +1,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-
 <script type="text/template" id="profile-infos">
   <div class="span12 text-center">
     <a href="/tatami/profile/<@= profile.username @>/" title="<fmt:message key="tatami.user.profile.show"/> @<@= profile.username @> <@= profile.firstName @> <@= profile.lastName @>">
@@ -64,7 +63,9 @@
 <script type="text/template" id="update-template">
   <fieldset class="span12">
     <div class="control-group">
+	  <a href="#" onclick="searchSuggestions('#dm', $('#suggest'));return false;">pop</a>
       <textarea id="updateStatusContent" class="span12" required="required" placeholder="<fmt:message key="tatami.status.update"/>..." maxlength="500" name="content"></textarea>
+	  <div id="suggest"><ul class="suggest-menu"></ul></div>
       <span id="contentHelp" class="pull-right" title="<fmt:message key="tatami.status.help.title"/>" data-content="<fmt:message key="tatami.status.help"/>"><i class="icon-question-sign"></i> <fmt:message key="tatami.status.help.title"/></span>
     </div>
     <div>

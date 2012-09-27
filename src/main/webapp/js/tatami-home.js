@@ -23,6 +23,87 @@ else {
   Profile
 */
 
+/*
+ * Feed the suggestion popup container with the results
+ */
+function feedSuggestions(target, results) {
+	if (target == null || results == null) {
+		return;
+	}
+
+	var ul = target.find('ul.suggest-menu');
+	ul.find('li').remove(); // clean any previous results
+    for (var i = 0; i < results.length; i++) {
+    	ul.append(
+    	    $('<li>').attr('class', 'suggest').append(results[i])
+    	);
+	}
+    ul.find("li.suggest").bind("click", function() {
+    	updateStatusWithSuggestion($("#updateStatusContent"), $(this).text());
+    	target.hide();
+    });
+	target.show();
+}
+
+/*
+ * Search against one of the two services depending on the query first char (@ or # allowed)
+ * The target is the popup container to display the results list
+ */
+function searchSuggestions(query, target) {
+	if (target == null
+			|| query == null || query.length == 0
+			|| (query.charAt(0) != '@' && query.charAt(0) != '#')) {
+		return;
+	}
+
+	switch (query.charAt(0)) {
+		case '@' :
+			q = query.substring(1, query.length);
+			$.get('/tatami/rest/users/search', {q:q}, function (data) {
+		        var results = [];
+		        for (var i = 0; i < data.length; i++) {
+		            results[i] = '@' + data[i].username;
+		        }
+		        feedSuggestions(target, results);
+		    });
+			break;
+		case '#' :
+			q = query.substring(1, query.length);
+			$.get('/tatami/rest/tags/search', {q:q}, function (data) {
+		        var results = [];
+		        for (var i = 0; i < data.length; i++) {
+		            results[i] = data[i];
+		        }
+		        feedSuggestions(target, results);
+		    });
+			break;
+	}
+
+}
+
+/*
+ * Update a status with a suggestion.
+ * Replace the last expression (could be a user id beginning with @ or a hashtag with '#')
+ * with the value provided.
+ * @param container is a jQuery Textarea wrapper
+ * @value the value to inject in place of the last characters
+ */
+function updateStatusWithSuggestion(container, value) {
+	if (container == null || container.val().length == 0
+			|| value == null || value.length == 0
+			|| (value.charAt(0) != '@' && value.charAt(0) != '#')) {
+		return;
+	}
+	var textBefore = container.val();
+	var firstChar = value.charAt(0);
+	if (textBefore.lastIndexOf(firstChar) > -1) {
+		var textAfter = textBefore.substring(0, textBefore.lastIndexOf(firstChar)) + value + ' ';
+		container.focus();
+		container.val('');
+		container.val(textAfter);
+	}
+}
+
 app.Model.ProfileModel = Backbone.Model.extend({
   defaults: {
     'gravatar': '',
@@ -882,6 +963,10 @@ app.Router.HomeRouter = Backbone.Router.extend({
             allowed:500,
             warning:50,
             counterText:text_characters_left + " "
+        });
+        
+        $("li.suggest").bind("click", function(){
+        	updateStatusWithSuggestion($("#updateStatusContent"), $(this).text());
         });
         $("#updateStatusContent").bind('keypress', function (e) {
             var keycode = (e.keycode ? e.keycode : e.which);
