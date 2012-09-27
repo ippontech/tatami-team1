@@ -742,4 +742,9 @@ function updateStatusWithSuggestion(container, value) {
 		container.val('');
 		container.val(textAfter);
 	}
+	var suggestionEl = container.parent().find('.suggest');
+
+	var ul = suggestionEl.find('ul.suggest-menu');
+	ul.find('li').remove(); // clean any previous results
+
 }
