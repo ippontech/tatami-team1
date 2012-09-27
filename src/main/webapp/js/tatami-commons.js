@@ -660,7 +660,7 @@ $(function() {
 /*
  * Feed the suggestion popup container with the results
  */
-function feedSuggestions(target, results) {
+function feedSuggestions(target, results, targetDOM) {
 	if (target == null || results == null) {
 		return;
 	}
@@ -678,7 +678,7 @@ function feedSuggestions(target, results) {
     	);
 	}
     ul.find("li.suggest").bind("click", function() {
-    	updateStatusWithSuggestion(target, $(this).text());
+    	updateStatusWithSuggestion(target, $(this).text(), targetDOM);
     	suggestionEl.hide();
     });
     suggestionEl.show();
@@ -704,7 +704,7 @@ function searchSuggestions(query, targetDOM) {
 		        for (var i = 0; i < data.length; i++) {
 		            results[i] = '@' + data[i].username;
 		        }
-		        feedSuggestions(target, results);
+		        feedSuggestions(target, results, targetDOM);
 		    });
 			break;
 		case '#' :
@@ -714,7 +714,7 @@ function searchSuggestions(query, targetDOM) {
 		        for (var i = 0; i < data.length; i++) {
 		            results[i] = '#' + data[i];
 		        }
-		        feedSuggestions(target, results);
+		        feedSuggestions(target, results, targetDOM);
 		    });
 			break;
 	}
@@ -728,7 +728,7 @@ function searchSuggestions(query, targetDOM) {
  * @param container is a jQuery Textarea wrapper
  * @value the value to inject in place of the last characters
  */
-function updateStatusWithSuggestion(container, value) {
+function updateStatusWithSuggestion(container, value, targetDOM) {
 	if (container == null || container.val().length == 0
 			|| value == null || value.length == 0
 			|| (value.charAt(0) != '@' && value.charAt(0) != '#')) {
@@ -741,6 +741,9 @@ function updateStatusWithSuggestion(container, value) {
 		container.focus();
 		container.val('');
 		container.val(textAfter);
+		var e = jQuery.Event("keyup");
+        e.keyCode = 32;
+        $(targetDOM).trigger(e);
 	}
 	var suggestionEl = container.parent().find('.suggest');
 

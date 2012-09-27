@@ -82,6 +82,7 @@ app.View.UpdateView = Backbone.View.extend({
   },
 
    logKey: function(e) {
+
       var keycode = e.keyCode;
       var searchString;
       var targ;
