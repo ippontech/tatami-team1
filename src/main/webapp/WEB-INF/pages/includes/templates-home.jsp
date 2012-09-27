@@ -63,8 +63,8 @@
 <script type="text/template" id="update-template">
   <fieldset class="span12">
     <div class="control-group">
+	  <a href="#" onclick="searchSuggestions('@dm', $('#updateStatusContent'));return false;">pop</a>
       <textarea id="updateStatusContent" class="span12" required="required" placeholder="<fmt:message key="tatami.status.update"/>..." maxlength="500" name="content"></textarea>
-	  <div id="suggest"><ul class="suggest-menu"></ul></div>
       <span id="contentHelp" class="pull-right" title="<fmt:message key="tatami.status.help.title"/>" data-content="<fmt:message key="tatami.status.help"/>"><i class="icon-question-sign"></i> <fmt:message key="tatami.status.help.title"/></span>
     </div>
     <div>
